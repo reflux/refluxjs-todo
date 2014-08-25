@@ -206,7 +206,6 @@ var TodoApp = React.createClass({
     },
     componentDidMount: function() {
         this.listenTo(todoListStore, this.listChanged, this.listChanged);
-        console.log(this.props.state);
     },
     listChanged: function(todoList) {
         this.setState({
