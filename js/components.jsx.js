@@ -60,7 +60,7 @@ var TodoItem = React.createClass({
                     <label>{this.state.label}</label>
                     <button className="destroy" onClick={this.handleDestroy}></button>
                 </div>
-                <input className="edit" valueLink={this.linkState('editValue') } onKeyPress={this.handleValue} />
+                <input className="edit" valueLink={this.linkState('editValue') } onKeyUp={this.handleValue} />
             </li>
         );
     }
@@ -139,7 +139,7 @@ var TodoHeader = React.createClass({
         return (
             <header id="header">
                 <h1>todos</h1>
-                <input id="new-todo" placeholder="What needs to be done?" autoFocus onKeyPress={this.addTodo}/>
+                <input id="new-todo" placeholder="What needs to be done?" autoFocus onKeyUp={this.addTodo}/>
             </header>
         );
     }
