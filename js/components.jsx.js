@@ -4,6 +4,10 @@ function isEnterKeyPressed(evt) {
     return evt.nativeEvent.keyCode === 13;
 }
 
+function isNotEmpty(text) {
+    return text && text !== "";
+}
+
 var TodoItem = React.createClass({
     mixins: [React.addons.LinkedStateMixin],
     getDefaultProps: function() {
@@ -38,7 +42,8 @@ var TodoItem = React.createClass({
         return false;
     },
     handleValue: function(evt) {
-        if (isEnterKeyPressed(evt)) {
+        var text = this.state.editValue;
+        if (isEnterKeyPressed(evt) && isNotEmpty(text)) {
             Todo.edit(this.props.item.key, this.state.editValue);
         }
     },
@@ -129,8 +134,9 @@ var TodoMain = React.createClass({
 
 var TodoHeader = React.createClass({
     addTodo: function(evt) {
-        if (isEnterKeyPressed(evt)) { // enter key pressed
-            Todo.add(evt.target.value);
+        var text = evt.target.value;
+        if (isEnterKeyPressed(evt) && isNotEmpty(text)) { // enter key pressed
+            Todo.add(text);
             evt.target.value = '';
         }
     },
