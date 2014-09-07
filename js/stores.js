@@ -39,10 +39,13 @@
             this.listenTo(Todo.clearCompleted, this.clearCompleted);
             this.listenTo(Todo.edit, this.editItem);
         },
-        editItem: function(itemKey, newLabel) {
-            var foundItem = _.find(this.list, function(item) {
+        _itemForKey: function(itemKey) {
+            return _.find(this.list, function(item) {
                 return item.key === itemKey;
             });
+        },
+        editItem: function(itemKey, newLabel) {
+            var foundItem = this._itemForKey(itemKey);
             if (!foundItem) {
                 return;
             }
@@ -63,9 +66,7 @@
             this.trigger(this.list);
         },
         toggleItem: function(itemToToggle, isComplete) {
-            var foundItem = _.find(this.list, function(item) {
-                return itemToToggle.key === item.key;
-            });
+            var foundItem = this._itemForKey(itemToToggle.key);
             if (foundItem) {
                 foundItem.isComplete = isComplete;
                 this.trigger(this.list);
