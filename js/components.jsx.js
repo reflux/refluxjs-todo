@@ -158,14 +158,14 @@ var TodoFooter = React.createClass({
         };
     },
     componentWillReceiveProps: function(nextProps) {
-        var completeIncomplete = _.countBy(nextProps.list, "isComplete");
-        var complete = _.has(completeIncomplete, true) ? completeIncomplete[true] : 0 ;
-        var incomplete = _.has(completeIncomplete, false) ? completeIncomplete[false] : 0 ;
+        var all = nextProps.list.length;
+        var complete = _.filter(nextProps.list, "isComplete").length;
+        var incomplete = all - complete;
         this.setState({
             completedCount: complete,
             hideClearButton: complete < 1,
             count: incomplete,
-            isHidden: (complete + incomplete) < 1
+            isHidden: all < 1
         });
     },
     clearCompleted: function() {
