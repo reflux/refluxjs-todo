@@ -4,6 +4,10 @@ function isEnterKeyPressed(evt) {
     return evt.nativeEvent.keyCode === 13;
 }
 
+function isNotEmpty(text) {
+    return text && text !== "";
+}
+
 var TodoItem = React.createClass({
     mixins: [React.addons.LinkedStateMixin],
     getDefaultProps: function() {
@@ -38,7 +42,8 @@ var TodoItem = React.createClass({
         return false;
     },
     handleValue: function(evt) {
-        if (isEnterKeyPressed(evt)) {
+        var text = this.state.editValue;
+        if (isEnterKeyPressed(evt) && isNotEmpty(text)) {
             Todo.edit(this.props.item.key, this.state.editValue);
         }
     },
@@ -46,15 +51,12 @@ var TodoItem = React.createClass({
         Todo.remove(this.props.item);
     },
     render: function() {
-        var classes = [];
-        if (this.state.isComplete) {
-            classes.push('completed');
-        }
-        if (this.state.isEditing) {
-            classes.push('editing');
-        }
+        var classes = React.addons.classSet({
+            'completed': this.state.isComplete,
+            'editing': this.state.isEditing
+        });
         return (
-            <li className={classes.join(' ')} onDoubleClick={this.handleEdit}>
+            <li className={classes} onDoubleClick={this.handleEdit}>
                 <div className="view">
                     <input className="toggle" type="checkbox" checked={this.state.isComplete} onChange={this.handleToggle} />
                     <label>{this.state.label}</label>
@@ -107,17 +109,19 @@ var TodoMain = React.createClass({
     },
     render: function() {
         var state = this.props.state;
+        var filteredList;
+        if (state === 'all') {
+            filteredList = this.props.list;
+        } else {
             filteredList = _.filter(this.props.list, function(item) {
                 switch (state) {
-                    default:
-                    case 'all':
-                        return true;
                     case 'completed':
                         return item.isComplete;
                     case 'active':
                         return !item.isComplete;
                 }
             });
+        }
         return (
             <section id="main" className={this.state.hide ? "hidden" : ""}>
                 <input id="toggle-all" type="checkbox" onChange={this.toggleAll} />
@@ -130,8 +134,9 @@ var TodoMain = React.createClass({
 
 var TodoHeader = React.createClass({
     addTodo: function(evt) {
-        if (isEnterKeyPressed(evt)) { // enter key pressed
-            Todo.add(evt.target.value);
+        var text = evt.target.value;
+        if (isEnterKeyPressed(evt) && isNotEmpty(text)) { // enter key pressed
+            Todo.add(text);
             evt.target.value = '';
         }
     },
@@ -159,11 +164,9 @@ var TodoFooter = React.createClass({
         };
     },
     componentWillReceiveProps: function(nextProps) {
-        var all = nextProps.list.length,
-            complete = _.reduce(nextProps.list, function(count, item) {
-                return item.isComplete ? count + 1 : count;
-            }, 0),
-            incomplete = all - complete;
+        var all = nextProps.list.length;
+        var complete = _.filter(nextProps.list, "isComplete").length;
+        var incomplete = all - complete;
         this.setState({
             completedCount: complete,
             hideClearButton: complete < 1,
