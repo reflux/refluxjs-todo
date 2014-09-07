@@ -46,15 +46,12 @@ var TodoItem = React.createClass({
         Todo.remove(this.props.item);
     },
     render: function() {
-        var classes = [];
-        if (this.state.isComplete) {
-            classes.push('completed');
-        }
-        if (this.state.isEditing) {
-            classes.push('editing');
-        }
+        var classes = React.addons.classSet({
+            'completed': this.state.isComplete,
+            'editing': this.state.isEditing
+        });
         return (
-            <li className={classes.join(' ')} onDoubleClick={this.handleEdit}>
+            <li className={classes} onDoubleClick={this.handleEdit}>
                 <div className="view">
                     <input className="toggle" type="checkbox" checked={this.state.isComplete} onChange={this.handleToggle} />
                     <label>{this.state.label}</label>
@@ -107,17 +104,19 @@ var TodoMain = React.createClass({
     },
     render: function() {
         var state = this.props.state;
+        var filteredList;
+        if (state === 'all') {
+            filteredList = this.props.list;
+        } else {
             filteredList = _.filter(this.props.list, function(item) {
                 switch (state) {
-                    default:
-                    case 'all':
-                        return true;
                     case 'completed':
                         return item.isComplete;
                     case 'active':
                         return !item.isComplete;
                 }
             });
+        }
         return (
             <section id="main" className={this.state.hide ? "hidden" : ""}>
                 <input id="toggle-all" type="checkbox" onChange={this.toggleAll} />
@@ -159,16 +158,14 @@ var TodoFooter = React.createClass({
         };
     },
     componentWillReceiveProps: function(nextProps) {
-        var all = nextProps.list.length,
-            complete = _.reduce(nextProps.list, function(count, item) {
-                return item.isComplete ? count + 1 : count;
-            }, 0),
-            incomplete = all - complete;
+        var completeIncomplete = _.countBy(nextProps.list, "isComplete");
+        var complete = _.has(completeIncomplete, true) ? completeIncomplete[true] : 0 ;
+        var incomplete = _.has(completeIncomplete, false) ? completeIncomplete[false] : 0 ;
         this.setState({
             completedCount: complete,
             hideClearButton: complete < 1,
             count: incomplete,
-            isHidden: all < 1
+            isHidden: (complete + incomplete) < 1
         });
     },
     clearCompleted: function() {
