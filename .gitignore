@@ -1,0 +1,25 @@
+# Node.JS specifics
+
+lib-cov
+*.seed
+*.log
+*.csv
+*.dat
+*.out
+*.pid
+*.gz
+
+pids
+logs
+results
+
+npm-debug.log
+node_modules
+
+# MacOSX specifics
+.DS_Store
+
+# Build artifacts
+tmp
+bower_components
+components
