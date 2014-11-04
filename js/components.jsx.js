@@ -1,7 +1,11 @@
 /** @jsx React.DOM */
 
 function isEnterKeyPressed(evt) {
-    return evt.nativeEvent.keyCode === 13;
+    return evt.which === 13;
+}
+
+function isEscapeKeyPressed(evt) {
+    return evt.which === 27;
 }
 
 function isNotEmpty(text) {
@@ -35,15 +39,32 @@ var TodoItem = React.createClass({
         Todo.toggle(this.props.item, evt.target.checked);
     },
     handleEdit: function(evt) {
+        evt.preventDefault();
         this.setState({
             isEditing: true,
             editValue: this.state.label
-        });
-        return false;
+        }, function() {
+            this.refs.editInput.getDOMNode().focus();
+        });        
     },
     handleValue: function(evt) {
         var text = this.state.editValue;
+
+        if (!this.state.isEditing) {
+            return;
+        }
+
         if (isEnterKeyPressed(evt) && isNotEmpty(text)) {
+            Todo.edit(this.props.item.key, this.state.editValue);
+        }
+        else if (isEscapeKeyPressed(evt)) {
+            this.setState({
+                isEditing: false
+            });
+        }
+    },
+    handleBlur: function() {
+        if (this.state.isEditing) {
             Todo.edit(this.props.item.key, this.state.editValue);
         }
     },
@@ -62,7 +83,7 @@ var TodoItem = React.createClass({
                     <label>{this.state.label}</label>
                     <button className="destroy" onClick={this.handleDestroy}></button>
                 </div>
-                <input className="edit" valueLink={this.linkState('editValue') } onKeyUp={this.handleValue} />
+                <input ref="editInput" className="edit" valueLink={this.linkState('editValue')} onKeyUp={this.handleValue} onBlur={this.handleBlur} />
             </li>
         );
     }
@@ -122,8 +143,11 @@ var TodoMain = React.createClass({
                 }
             });
         }
+        var classes = React.addons.classSet({
+            "hidden": this.state.hide
+        })
         return (
-            <section id="main" className={this.state.hide ? "hidden" : ""}>
+            <section id="main" className={classes}>
                 <input id="toggle-all" type="checkbox" onChange={this.toggleAll} />
                 <label htmlFor="toggle-all">Mark all as complete</label>
                 <TodoList list={filteredList} />
@@ -179,19 +203,23 @@ var TodoFooter = React.createClass({
     },
     render: function() {
         var completedLabel = "Clear completed (" + this.state.completedCount + ")",
-            clearButtonClass = this.state.hideClearButton ? "hidden" : "";
+            clearButtonClass = React.addons.classSet({hidden: this.state.hideClearButton}),
+            hiddenClass = React.addons.classSet({hidden: this.state.isHidden});
+
+        var itemsLeft = this.state.count > 1 ? " items left" : " item left";
+
         return (
-            <footer id="footer" className={this.state.isHidden ? "hidden" : ""}>
-                <span id="todo-count"><strong>{this.state.count}</strong>{ this.state.count > 1 ? " items left" : " item left"}</span>
+            <footer id="footer" className={hiddenClass}>
+                <span id="todo-count"><strong>{this.state.count}</strong>{itemsLeft}</span>
                 <ul id="filters">
                     <li>
-                        <ReactRouter.Link activeClassName="selected" to="/">All</ReactRouter.Link>
+                        <ReactRouter.Link activeClassName="selected" to="All">All</ReactRouter.Link>
                     </li>
                     <li>
-                        <ReactRouter.Link activeClassName="selected" to="/active">Active</ReactRouter.Link>
+                        <ReactRouter.Link activeClassName="selected" to="Active">Active</ReactRouter.Link>
                     </li>
                     <li>
-                        <ReactRouter.Link activeClassName="selected" to="/completed">Completed</ReactRouter.Link>
+                        <ReactRouter.Link activeClassName="selected" to="Completed">Completed</ReactRouter.Link>
                     </li>
                 </ul>
                 <button id="clear-completed" className={clearButtonClass} onClick={this.clearCompleted}>{completedLabel}</button>
@@ -229,9 +257,9 @@ var TodoApp = React.createClass({
 var routes = (
     <ReactRouter.Routes location="hash">
         <ReactRouter.Route handler={TodoApp}>
-            <ReactRouter.Route path="/" handler={TodoMain} state="all" />
-            <ReactRouter.Route path="/completed" handler={TodoMain} state="completed" />
-            <ReactRouter.Route path="/active" handler={TodoMain} state="active" />
+            <ReactRouter.Route name="All" path="/" handler={TodoMain} state="all" />
+            <ReactRouter.Route name="Completed" path="/completed" handler={TodoMain} state="completed" />
+            <ReactRouter.Route name="Active" path="/active" handler={TodoMain} state="active" />
         </ReactRouter.Route>
     </ReactRouter.Routes>
 );
