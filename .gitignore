@@ -21,5 +21,5 @@ node_modules
 
 # Build artifacts
 tmp
-bower_components
+#bower_components
 components
