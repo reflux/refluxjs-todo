@@ -162,6 +162,8 @@ var TodoHeader = React.createClass({
         if (isEnterKeyPressed(evt) && isNotEmpty(text)) { // enter key pressed
             Todo.add(text);
             evt.target.value = '';
+        } else if (isEscapeKeyPressed(evt)) {
+            evt.target.value = '';
         }
     },
     render: function() {
