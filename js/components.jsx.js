@@ -2,18 +2,6 @@
 
 (function(React, ReactRouter, Reflux, TodoActions, todoListStore, global) {
 
-    function isEnterKeyPressed(evt) {
-        return evt.which === 13;
-    }
-
-    function isEscapeKeyPressed(evt) {
-        return evt.which === 27;
-    }
-
-    function isNotEmpty(text) {
-        return text && text !== "";
-    }
-
     // Renders a single Todo item in the list
     // Used in TodoList
     var TodoItem = React.createClass({
@@ -42,11 +30,11 @@
         handleValueChange: function(evt) {
             var text = this.state.editValue; // because of the linkState call in render, this is the contents of the field
             // we pressed enter, if text isn't empty we blur the field which will cause a save
-            if (isEnterKeyPressed(evt) && isNotEmpty(text)) {
+            if (evt.which === 13 && text) {
                 this.refs.editInput.getDOMNode().blur();
             }
             // pressed escape. set editing to false before blurring so we won't save
-            else if (isEscapeKeyPressed(evt)) {
+            else if (evt.which === 27) {
                 this.setState({ isEditing: false },function(){
                     this.refs.editInput.getDOMNode().blur();
                 });
@@ -55,7 +43,7 @@
         handleBlur: function() {
             var text = this.state.editValue; // because of the linkState call in render, this is the contents of the field
             // unless we're not editing (escape was pressed) or text is empty, save!
-            if (this.state.isEditing && isNotEmpty(text)) {
+            if (this.state.isEditing && text) {
                 TodoActions.editItem(this.props.key, text);
             }
             // whatever the outcome, if we left the field we're not editing anymore
@@ -78,21 +66,6 @@
                     </div>
                     <input ref="editInput" className="edit" valueLink={this.linkState('editValue')} onKeyUp={this.handleValueChange} onBlur={this.handleBlur} />
                 </li>
-            );
-        }
-    });
-
-    // Renders the full list of existing todo items
-    // Used in TodoMain
-    var TodoList = React.createClass({
-        propTypes: {
-            list: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-        },
-        render: function() {
-            return (
-                <ul id="todo-list">
-                    { this.props.list.map(function(item){return <TodoItem label={item.label} isComplete={item.isComplete} key={item.key}/>; }) }
-                </ul>
             );
         }
     });
@@ -125,7 +98,9 @@
                 <section id="main" className={classes}>
                     <input id="toggle-all" type="checkbox" onChange={this.toggleAll} />
                     <label htmlFor="toggle-all">Mark all as complete</label>
-                    <TodoList list={filteredList} />
+                    <ul id="todo-list">
+                        { filteredList.map(function(item){return <TodoItem label={item.label} isComplete={item.isComplete} key={item.key}/>; }) }
+                    </ul>
                 </section>
             );
         }
@@ -137,10 +112,10 @@
     var TodoHeader = React.createClass({
         handleValueChange: function(evt) {
             var text = evt.target.value;
-            if (isEnterKeyPressed(evt) && isNotEmpty(text)) {
+            if (evt.which === 13 && text) { // hit enter, create new item if field isn't empty
                 TodoActions.addItem(text);
                 evt.target.value = '';
-            } else if (isEscapeKeyPressed(evt)) {
+            } else if (evt.which === 27) { // hit escape, clear without creating
                 evt.target.value = '';
             }
         },
