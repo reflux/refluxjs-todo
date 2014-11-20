@@ -135,34 +135,17 @@
         propTypes: {
             list: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
         },
-        getInitialState: function() {
-            return {
-                completedCount: 0,
-                hideClearButton: false,
-                hideFooter: true
-            };
-        },
-        componentWillReceiveProps: function(nextProps) {
-            var all = nextProps.list.length;
-            var complete = _.filter(nextProps.list, "isComplete").length;
-            var incomplete = all - complete;
-            this.setState({
-                completedCount: complete,
-                hideClearButton: complete < 1,
-                count: incomplete,
-                hideFooter: all < 1
-            });
-        },
         render: function() {
-            var completedLabel = "Clear completed (" + this.state.completedCount + ")",
-                clearButtonClass = React.addons.classSet({hidden: this.state.hideClearButton}),
-                footerClass = React.addons.classSet({hidden: this.state.hideFooter});
-
-            var itemsLeft = this.state.count > 1 ? " items left" : " item left";
-
+            var nbrcompleted = _.filter(this.props.list, "isComplete").length,
+                nbrtotal = this.props.list.length,
+                nbrincomplete = nbrtotal-nbrcompleted,
+                clearButtonClass = React.addons.classSet({hidden: nbrcompleted < 1}),
+                footerClass = React.addons.classSet({hidden: !nbrtotal }),
+                completedLabel = "Clear completed (" + nbrcompleted + ")",
+                itemsLeftLabel = nbrincomplete === 1 ? " item left" : " items left";
             return (
                 <footer id="footer" className={footerClass}>
-                    <span id="todo-count"><strong>{this.state.count}</strong>{itemsLeft}</span>
+                    <span id="todo-count"><strong>{nbrincomplete}</strong>{itemsLeftLabel}</span>
                     <ul id="filters">
                         <li>
                             <ReactRouter.Link activeClassName="selected" to="All">All</ReactRouter.Link>
