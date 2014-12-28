@@ -61,7 +61,7 @@
             this.trigger(list); // sends the updated list to all listening components (TodoApp)
         },
         // this will be called by all listening components as they register their listeners
-        getDefaultData: function() {
+        getInitialState: function() {
             var loadedList = localStorage.getItem(localStorageKey);
             if (!loadedList) {
                 // If no list is in localstorage, start out with a default one
