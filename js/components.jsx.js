@@ -171,11 +171,7 @@
     var TodoApp = React.createClass({
         // this will cause setState({list:updatedlist}) whenever the store does trigger(updatedlist)
         mixins: [Reflux.connect(todoListStore,"list")],
-        getInitialState: function() {
-            return {
-                list: []
-            };
-        },
+
         render: function() {
             return (
                 <div>
@@ -196,7 +192,7 @@
     );
 
     ReactRouter.run(routes, function(Handler) {
-        React.render(<Handler/>, document.getElementById('todoapp'));
+        React.renderComponent(<Handler/>, document.getElementById('todoapp'));
     });
 
 })(window.React, window.ReactRouter, window.Reflux, window.TodoActions, window.todoListStore, window);
