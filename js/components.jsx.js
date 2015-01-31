@@ -192,7 +192,7 @@
     );
 
     ReactRouter.run(routes, function(Handler) {
-        React.renderComponent(<Handler/>, document.getElementById('todoapp'));
+        React.render(<Handler/>, document.getElementById('todoapp'));
     });
 
 })(window.React, window.ReactRouter, window.Reflux, window.TodoActions, window.todoListStore, window);
