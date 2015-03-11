@@ -3,19 +3,19 @@
 (function(React, ReactRouter, Reflux, TodoActions, todoListStore, global) {
 
     // Renders a single Todo item in the list
-    // Used in TodoList
+    // Used in TodoMain
     var TodoItem = React.createClass({
         propTypes: {
             label: React.PropTypes.string.isRequired,
             isComplete: React.PropTypes.bool.isRequired,
-            key: React.PropTypes.number
+            id: React.PropTypes.number
         },
         mixins: [React.addons.LinkedStateMixin], // exposes this.linkState used in render
         getInitialState: function() {
             return {};
         },
         handleToggle: function(evt) {
-            TodoActions.toggleItem(this.props.key);
+            TodoActions.toggleItem(this.props.id);
         },
         handleEditStart: function(evt) {
             evt.preventDefault();
@@ -44,13 +44,13 @@
             var text = this.state.editValue; // because of the linkState call in render, this is the contents of the field
             // unless we're not editing (escape was pressed) or text is empty, save!
             if (this.state.isEditing && text) {
-                TodoActions.editItem(this.props.key, text);
+                TodoActions.editItem(this.props.id, text);
             }
             // whatever the outcome, if we left the field we're not editing anymore
             this.setState({isEditing:false});
         },
         handleDestroy: function() {
-            TodoActions.removeItem(this.props.key);
+            TodoActions.removeItem(this.props.id);
         },
         render: function() {
             var classes = React.addons.classSet({
@@ -73,6 +73,7 @@
     // Renders the todo list as well as the toggle all button
     // Used in TodoApp
     var TodoMain = React.createClass({
+        mixins: [ ReactRouter.State ],
         propTypes: {
             list: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
         },
@@ -81,15 +82,15 @@
         },
         render: function() {
             var filteredList;
-            switch(this.props.showing){
-                case 'all':
-                    filteredList = this.props.list;
-                    break;
-                case 'completed':
+            switch(this.getPath()){
+                case '/completed':
                     filteredList = _.filter(this.props.list,function(item){ return item.isComplete; });
                     break;
-                case 'active':
+                case '/active':
                     filteredList = _.filter(this.props.list,function(item){ return !item.isComplete; });
+                    break;
+                default:
+                    filteredList = this.props.list;
             }
             var classes = React.addons.classSet({
                 "hidden": this.props.list.length < 1
@@ -99,7 +100,9 @@
                     <input id="toggle-all" type="checkbox" onChange={this.toggleAll} />
                     <label htmlFor="toggle-all">Mark all as complete</label>
                     <ul id="todo-list">
-                        { filteredList.map(function(item){return <TodoItem label={item.label} isComplete={item.isComplete} key={item.key}/>; }) }
+                        { filteredList.map(function(item){
+                            return <TodoItem label={item.label} isComplete={item.isComplete} id={item.key} key={item.key}/>;
+                        })}
                     </ul>
                 </section>
             );
@@ -164,7 +167,7 @@
     });
 
     // Renders the full application
-    // activeRouteHandler will always be TodoMain, but with different 'showing' prop (all/completed/active)
+    // RouteHandler will always be TodoMain, but with different 'showing' prop (all/completed/active)
     var TodoApp = React.createClass({
         // this will cause setState({list:updatedlist}) whenever the store does trigger(updatedlist)
         mixins: [Reflux.connect(todoListStore,"list")],
@@ -173,7 +176,7 @@
             return (
                 <div>
                     <TodoHeader />
-                    <this.props.activeRouteHandler list={this.state.list} />
+                    <ReactRouter.RouteHandler list={this.state.list} />
                     <TodoFooter list={this.state.list} />
                 </div>
             );
@@ -181,16 +184,15 @@
     });
 
     var routes = (
-        <ReactRouter.Routes location="hash">
-            <ReactRouter.Route handler={TodoApp}>
-                <ReactRouter.Route name="All" path="/" handler={TodoMain} showing="all" />
-                <ReactRouter.Route name="Completed" path="/completed" handler={TodoMain} showing="completed" />
-                <ReactRouter.Route name="Active" path="/active" handler={TodoMain} showing="active" />
-            </ReactRouter.Route>
-        </ReactRouter.Routes>
+        <ReactRouter.Route handler={TodoApp}>
+            <ReactRouter.Route name="All" path="/" handler={TodoMain} />
+            <ReactRouter.Route name="Completed" path="/completed" handler={TodoMain} />
+            <ReactRouter.Route name="Active" path="/active" handler={TodoMain} />
+        </ReactRouter.Route>
     );
 
-    React.renderComponent(routes, document.getElementById('todoapp'));
-
+    ReactRouter.run(routes, function(Handler) {
+        React.render(<Handler/>, document.getElementById('todoapp'));
+    });
 
 })(window.React, window.ReactRouter, window.Reflux, window.TodoActions, window.todoListStore, window);

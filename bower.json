@@ -2,10 +2,10 @@
   "name": "reflux-todo",
   "version": "0.0.1",
   "dependencies": {
-    "todomvc-common": "~0.1.4",
-    "reflux": "~0.2.1",
-    "react": "~0.11.1",
-    "lodash": "~2.4.1",
-    "react-router": "~0.7.0"
+    "todomvc-app-css": "~1.0.1",
+    "reflux": "~0.2.4",
+    "react": "~0.12.2",
+    "lodash": "~3.0.1",
+    "react-router": "~0.11.6"
   }
 }
