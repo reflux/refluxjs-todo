@@ -17,7 +17,7 @@ Install dependencies with bower and npm. You'll first need to have [bower](http:
 bower install && npm install
 ```
 
-This project comes with a grunt task to runs a [`connect`]() web server and opens up the web browser for you. Just run:
+This project comes with a grunt task to runs a [`connect`](https://github.com/gruntjs/grunt-contrib-connect) web server and opens up the web browser for you. Just run:
 
 ```
 grunt
